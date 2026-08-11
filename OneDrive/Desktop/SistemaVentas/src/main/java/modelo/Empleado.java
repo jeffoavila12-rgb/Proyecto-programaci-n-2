@@ -26,5 +26,7 @@ public class Empleado extends Persona {
     @Override
     public String mostrarInformacion() {
         return "Empleado: " + nombre + " [" + codigoEmpleado + "] - " + puesto;
+        
+        //Comentario xdlol
     }
 }
