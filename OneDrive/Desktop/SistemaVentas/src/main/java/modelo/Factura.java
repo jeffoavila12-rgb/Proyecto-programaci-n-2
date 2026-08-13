@@ -3,23 +3,22 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package modelo;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * @author jeffo
- */
 public class Factura {
-    private String numeroFactura;
-    private String cliente;
-    private String fecha;
+
+    private int idFactura;
+    private LocalDate fecha;
+    private Cliente cliente;
     private List<DetalleFactura> detalles;
 
-    public Factura(String numeroFactura, String cliente, String fecha) {
-        this.numeroFactura = numeroFactura;
-        this.cliente = cliente;
+    public Factura(int idFactura, LocalDate fecha, Cliente cliente) {
+        this.idFactura = idFactura;
         this.fecha = fecha;
+        this.cliente = cliente;
         this.detalles = new ArrayList<>();
     }
 
@@ -29,15 +28,27 @@ public class Factura {
 
     public double calcularTotal() {
         double total = 0;
+
         for (DetalleFactura d : detalles) {
             total += d.getSubtotal();
         }
+
         return total;
     }
 
-    // Getters
-    public String getNumeroFactura() { return numeroFactura; }
-    public String getCliente() { return cliente; }
-    public String getFecha() { return fecha; }
-    public List<DetalleFactura> getDetalles() { return detalles; }
+    public int getIdFactura() {
+        return idFactura;
+    }
+
+    public LocalDate getFecha() {
+        return fecha;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public List<DetalleFactura> getDetalles() {
+        return detalles;
+    }
 }
