@@ -3,23 +3,26 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package vista;
+
 import modelo.Cliente;
+import dao.ClienteDAO;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
-/**
- *
- * @author jeffo
- */
 
 public class FrmCliente extends JInternalFrame {
+
     private JTextField txtId, txtNombre, txtNit, txtTelefono, txtDireccion;
     private DefaultTableModel modeloTabla;
-    private ArrayList<Cliente> listaClientes = new ArrayList<>();
+    private ClienteDAO clienteDAO;
 
     public FrmCliente() {
+
         super("Gestión de Clientes", true, true, true, true);
+
+        clienteDAO = new ClienteDAO();
+
         setSize(600, 400);
         setLayout(new BorderLayout());
 
@@ -53,17 +56,57 @@ public class FrmCliente extends JInternalFrame {
     }
 
     private void guardarCliente() {
-        try {
-            int id = Integer.parseInt(txtId.getText());
-            Cliente c = new Cliente(id, txtNombre.getText(), txtNit.getText(), txtTelefono.getText(), txtDireccion.getText());
-            listaClientes.add(c);
-            modeloTabla.addRow(new Object[]{c.getId(), c.getNombre(), c.getNit(), c.getTelefono(), c.getDireccion()});
-            JOptionPane.showMessageDialog(this, "Cliente guardado exitosamente.");
-            limpiar();
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "El ID debe ser un número entero.");
+
+    try {
+
+        int id = Integer.parseInt(txtId.getText());
+
+        String nombre = txtNombre.getText().trim();
+        String nit = txtNit.getText().trim();
+        String telefono = txtTelefono.getText().trim();
+        String direccion = txtDireccion.getText().trim();
+
+        if (nombre.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Ingrese el nombre del cliente.");
+            return;
         }
+
+        Cliente c = new Cliente(
+                id,
+                nombre,
+                nit,
+                telefono,
+                direccion
+        );
+
+        if (clienteDAO.guardar(c)) {
+
+            modeloTabla.addRow(new Object[]{
+                c.getId(),
+                c.getNombre(),
+                c.getNit(),
+                c.getTelefono(),
+                c.getDireccion()
+            });
+
+            JOptionPane.showMessageDialog(this,
+                    "Cliente guardado correctamente en MySQL.");
+
+            limpiar();
+
+        } else {
+
+            JOptionPane.showMessageDialog(this,
+                    "No se pudo guardar el cliente.");
+        }
+
+    } catch (NumberFormatException ex) {
+
+        JOptionPane.showMessageDialog(this,
+                "El ID debe ser un número entero.");
     }
+}
 
     private void limpiar() {
         txtId.setText(""); txtNombre.setText(""); txtNit.setText(""); txtTelefono.setText(""); txtDireccion.setText("");

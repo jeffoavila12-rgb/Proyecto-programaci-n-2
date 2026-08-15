@@ -1,211 +1,532 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package vista;
+
 import dao.FacturaDAO;
 import modelo.Cliente;
 import modelo.DetalleFactura;
 import modelo.Factura;
 import modelo.Producto;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-/**
- *
- * @author Jeffo
- */
+
 public class FrmFacturas extends JInternalFrame {
 
-    private JTextField txtNumero, txtCliente, txtFecha, txtProducto, txtPrecio, txtCantidad;
-    private JLabel lblSubtotal, lblTotal;
-    private JTable tablaProductos;
+    private JTextField txtNumero;
+    private JTextField txtCliente;
+    private JTextField txtFecha;
+
+    private JTextField txtProducto;
+    private JTextField txtPrecio;
+    private JTextField txtCantidad;
+
+    private JLabel lblTotal;
+
+    private JTable tabla;
     private DefaultTableModel modeloTabla;
+
     private FacturaDAO facturaDAO;
 
-    // Lista temporal para almacenar los objetos Producto agregados a la tabla
-    private ArrayList<Producto> listaProductosTabla = new ArrayList<>();
-
     public FrmFacturas() {
-        super("Formulario de Facturación", true, true, true, true);
-        this.setSize(750, 550);
-        this.facturaDAO = new FacturaDAO();
 
-        this.setLayout(new BorderLayout(10, 10));
+        super(
+                "Gestión de Facturas",
+                true,
+                true,
+                true,
+                true
+        );
 
-        // --- PANEL NORTE: CABECERA DE FACTURA ---
-        JPanel panelCabecera = new JPanel(new GridLayout(2, 4, 10, 10));
-        panelCabecera.setBorder(BorderFactory.createTitledBorder("Datos de la Factura"));
+        setSize(750, 550);
 
-        panelCabecera.add(new JLabel("No. Factura:"));
-        int idSiguiente = facturaDAO.listar().size() + 1;
-        txtNumero = new JTextField(String.valueOf(idSiguiente));
-        txtNumero.setEditable(false);
-        panelCabecera.add(txtNumero);
+        setLayout(
+                new BorderLayout(10, 10)
+        );
 
-        panelCabecera.add(new JLabel("Fecha (yyyy-MM-dd):"));
-        txtFecha = new JTextField(LocalDate.now().toString());
-        panelCabecera.add(txtFecha);
+        facturaDAO = new FacturaDAO();
 
-        panelCabecera.add(new JLabel("Cliente:"));
+        // ==========================================
+        // DATOS DE LA FACTURA
+        // ==========================================
+
+        JPanel panelFactura =
+                new JPanel(
+                        new GridLayout(3, 2, 5, 5)
+                );
+
+        panelFactura.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Datos de la Factura"
+                )
+        );
+
+        txtNumero = new JTextField();
         txtCliente = new JTextField();
-        panelCabecera.add(txtCliente);
+        txtFecha = new JTextField(
+                LocalDate.now().toString()
+        );
 
-        panelCabecera.add(new JLabel("")); 
-        panelCabecera.add(new JLabel("")); 
+        panelFactura.add(
+                new JLabel("ID Factura:")
+        );
 
-        this.add(panelCabecera, BorderLayout.NORTH);
+        panelFactura.add(txtNumero);
 
-        // --- PANEL CENTRO ---
-        JPanel panelCentro = new JPanel(new BorderLayout(5, 5));
+        panelFactura.add(
+                new JLabel("ID Cliente:")
+        );
 
-        JPanel panelInputProducto = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelInputProducto.setBorder(BorderFactory.createTitledBorder("Agregar Artículo"));
+        panelFactura.add(txtCliente);
 
-        txtProducto = new JTextField(12);
-        txtPrecio = new JTextField(5);
-        txtCantidad = new JTextField(4);
-        JButton btnAgregar = new JButton("Agregar");
+        panelFactura.add(
+                new JLabel("Fecha:")
+        );
 
-        panelInputProducto.add(new JLabel("Producto:"));
-        panelInputProducto.add(txtProducto);
-        panelInputProducto.add(new JLabel("Precio:"));
-        panelInputProducto.add(txtPrecio);
-        panelInputProducto.add(new JLabel("Cantidad:"));
-        panelInputProducto.add(txtCantidad);
-        panelInputProducto.add(btnAgregar);
+        panelFactura.add(txtFecha);
 
-        modeloTabla = new DefaultTableModel(new String[]{"ID", "Producto", "Precio", "Cantidad", "Subtotal"}, 0);
-        tablaProductos = new JTable(modeloTabla);
-        JScrollPane scrollTabla = new JScrollPane(tablaProductos);
+        add(
+                panelFactura,
+                BorderLayout.NORTH
+        );
 
-        panelCentro.add(panelInputProducto, BorderLayout.NORTH);
-        panelCentro.add(scrollTabla, BorderLayout.CENTER);
+        // ==========================================
+        // PRODUCTOS
+        // ==========================================
 
-        this.add(panelCentro, BorderLayout.CENTER);
+        JPanel panelProducto =
+                new JPanel(
+                        new FlowLayout(
+                                FlowLayout.LEFT
+                        )
+                );
 
-        // --- PANEL SUR ---
-        JPanel panelSur = new JPanel(new BorderLayout());
+        panelProducto.setBorder(
+                BorderFactory.createTitledBorder(
+                        "Agregar Producto"
+                )
+        );
 
-        JPanel panelTotales = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        lblSubtotal = new JLabel("Subtotal: $0.00");
-        lblTotal = new JLabel("TOTAL: $0.00");
-        lblTotal.setFont(new Font("Tahoma", Font.BOLD, 14));
+        txtProducto =
+                new JTextField(8);
 
-        panelTotales.add(lblSubtotal);
-        panelTotales.add(Box.createHorizontalStrut(20));
-        panelTotales.add(lblTotal);
+        txtPrecio =
+                new JTextField(7);
 
-        JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton btnEliminar = new JButton("Eliminar Seleccionado");
-        JButton btnGuardar = new JButton("Guardar Factura");
+        txtCantidad =
+                new JTextField(5);
 
-        panelAcciones.add(btnEliminar);
-        panelAcciones.add(btnGuardar);
+        JButton btnAgregar =
+                new JButton("Agregar");
 
-        panelSur.add(panelTotales, BorderLayout.NORTH);
-        panelSur.add(panelAcciones, BorderLayout.SOUTH);
+        panelProducto.add(
+                new JLabel("ID Producto:")
+        );
 
-        this.add(panelSur, BorderLayout.SOUTH);
+        panelProducto.add(txtProducto);
 
-        btnAgregar.addActionListener(e -> agregarProductoATabla());
-        btnEliminar.addActionListener(e -> eliminarProductoDeTabla());
-        btnGuardar.addActionListener(e -> guardarFactura());
+        panelProducto.add(
+                new JLabel("Precio:")
+        );
+
+        panelProducto.add(txtPrecio);
+
+        panelProducto.add(
+                new JLabel("Cantidad:")
+        );
+
+        panelProducto.add(txtCantidad);
+
+        panelProducto.add(btnAgregar);
+
+        // ==========================================
+        // TABLA
+        // ==========================================
+
+        modeloTabla =
+                new DefaultTableModel(
+                        new String[]{
+                            "ID Producto",
+                            "Precio",
+                            "Cantidad",
+                            "Subtotal"
+                        },
+                        0
+                );
+
+        tabla =
+                new JTable(modeloTabla);
+
+        JScrollPane scroll =
+                new JScrollPane(tabla);
+
+        JPanel centro =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        centro.add(
+                panelProducto,
+                BorderLayout.NORTH
+        );
+
+        centro.add(
+                scroll,
+                BorderLayout.CENTER
+        );
+
+        add(
+                centro,
+                BorderLayout.CENTER
+        );
+
+        // ==========================================
+        // PARTE INFERIOR
+        // ==========================================
+
+        JPanel panelInferior =
+                new JPanel(
+                        new BorderLayout()
+                );
+
+        lblTotal =
+                new JLabel("TOTAL: Q0.00");
+
+        lblTotal.setFont(
+                new Font(
+                        "Tahoma",
+                        Font.BOLD,
+                        16
+                )
+        );
+
+        JButton btnEliminar =
+                new JButton(
+                        "Eliminar seleccionado"
+                );
+
+        JButton btnGuardar =
+                new JButton(
+                        "Guardar Factura"
+                );
+
+        JPanel botones =
+                new JPanel();
+
+        botones.add(btnEliminar);
+        botones.add(btnGuardar);
+
+        panelInferior.add(
+                lblTotal,
+                BorderLayout.WEST
+        );
+
+        panelInferior.add(
+                botones,
+                BorderLayout.EAST
+        );
+
+        add(
+                panelInferior,
+                BorderLayout.SOUTH
+        );
+
+        // ==========================================
+        // EVENTOS
+        // ==========================================
+
+        btnAgregar.addActionListener(
+                e -> agregarProducto()
+        );
+
+        btnEliminar.addActionListener(
+                e -> eliminarProducto()
+        );
+
+        btnGuardar.addActionListener(
+                e -> guardarFactura()
+        );
     }
 
-    private void agregarProductoATabla() {
-        try {
-            String prodNombre = txtProducto.getText().trim();
-            double precio = Double.parseDouble(txtPrecio.getText().trim());
-            int cantidad = Integer.parseInt(txtCantidad.getText().trim());
+    // ==========================================
+    // AGREGAR PRODUCTO
+    // ==========================================
 
-            if (prodNombre.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Ingrese el nombre del producto.");
+    private void agregarProducto() {
+
+        try {
+
+            int idProducto =
+                    Integer.parseInt(
+                            txtProducto
+                                    .getText()
+                                    .trim()
+                    );
+
+            double precio =
+                    Double.parseDouble(
+                            txtPrecio
+                                    .getText()
+                                    .trim()
+                    );
+
+            int cantidad =
+                    Integer.parseInt(
+                            txtCantidad
+                                    .getText()
+                                    .trim()
+                    );
+
+            if (precio <= 0 ||
+                    cantidad <= 0) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Precio y cantidad deben ser mayores que 0."
+                );
+
                 return;
             }
 
-            // Crear objeto Producto compatible con el Diagrama UML
-            int idProd = listaProductosTabla.size() + 1;
-            Producto p = new Producto(idProd, prodNombre, precio, 100);
-            listaProductosTabla.add(p);
+            double subtotal =
+                    precio * cantidad;
 
-            double subtotal = precio * cantidad;
-            modeloTabla.addRow(new Object[]{p.getIdProducto(), p.getNombre(), precio, cantidad, subtotal});
+            modeloTabla.addRow(
+                    new Object[]{
+                        idProducto,
+                        precio,
+                        cantidad,
+                        subtotal
+                    }
+            );
 
-            limpiarCamposProducto();
-            actualizarTotales();
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Precio y Cantidad deben ser valores numéricos válidos.");
+            actualizarTotal();
+
+            txtProducto.setText("");
+            txtPrecio.setText("");
+            txtCantidad.setText("");
+
+            txtProducto.requestFocus();
+
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Ingrese valores numéricos válidos."
+            );
         }
     }
 
-    private void eliminarProductoDeTabla() {
-        int filaSeleccionada = tablaProductos.getSelectedRow();
-        if (filaSeleccionada >= 0) {
-            modeloTabla.removeRow(filaSeleccionada);
-            listaProductosTabla.remove(filaSeleccionada);
-            actualizarTotales();
+    // ==========================================
+    // ELIMINAR
+    // ==========================================
+
+    private void eliminarProducto() {
+
+        int fila =
+                tabla.getSelectedRow();
+
+        if (fila >= 0) {
+
+            modeloTabla.removeRow(fila);
+
+            actualizarTotal();
+
         } else {
-            JOptionPane.showMessageDialog(this, "Seleccione una fila para eliminar.");
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Seleccione un producto."
+            );
         }
     }
 
-    private void actualizarTotales() {
-        double subtotalAcumulado = 0;
-        for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-            subtotalAcumulado += (double) modeloTabla.getValueAt(i, 4);
+    // ==========================================
+    // TOTAL
+    // ==========================================
+
+    private void actualizarTotal() {
+
+        double total = 0;
+
+        for (int i = 0;
+                i < modeloTabla.getRowCount();
+                i++) {
+
+            total +=
+                    ((Number)
+                            modeloTabla
+                                    .getValueAt(i, 3))
+                            .doubleValue();
         }
-        lblSubtotal.setText(String.format("Subtotal: $%.2f", subtotalAcumulado));
-        lblTotal.setText(String.format("TOTAL: $%.2f", subtotalAcumulado));
+
+        lblTotal.setText(
+                String.format(
+                        "TOTAL: Q%.2f",
+                        total
+                )
+        );
     }
+
+    // ==========================================
+    // GUARDAR
+    // ==========================================
 
     private void guardarFactura() {
-        String nombreCliente = txtCliente.getText().trim();
-        if (nombreCliente.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe ingresar el nombre del cliente.");
-            return;
-        }
-
-        if (modeloTabla.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "Debe agregar al menos un producto a la factura.");
-            return;
-        }
 
         try {
-            int idFactura = Integer.parseInt(txtNumero.getText());
-            LocalDate fecha = LocalDate.parse(txtFecha.getText());
 
-            // Instanciar objeto Cliente (derivado de Persona en el UML)
-            Cliente clienteObj = new Cliente(1, nombreCliente, "CF", "00000000", "Ciudad");
+            int idFactura =
+                    Integer.parseInt(
+                            txtNumero
+                                    .getText()
+                                    .trim()
+                    );
 
-            // Instanciar Factura con los tipos correctos del UML
-            Factura nuevaFactura = new Factura(idFactura, fecha, clienteObj);
+            int idCliente =
+                    Integer.parseInt(
+                            txtCliente
+                                    .getText()
+                                    .trim()
+                    );
 
-            for (int i = 0; i < modeloTabla.getRowCount(); i++) {
-                Producto p = listaProductosTabla.get(i);
-                int cant = (int) modeloTabla.getValueAt(i, 3);
-                double prec = (double) modeloTabla.getValueAt(i, 2);
+            LocalDate fecha =
+                    LocalDate.parse(
+                            txtFecha
+                                    .getText()
+                                    .trim()
+                    );
 
-                // Instanciar DetalleFactura con tipos UML
-                DetalleFactura detalle = new DetalleFactura(p, cant, prec);
-                nuevaFactura.agregarDetalle(detalle);
+            if (modeloTabla.getRowCount() == 0) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Agregue al menos un producto."
+                );
+
+                return;
             }
 
-            if (facturaDAO.guardar(nuevaFactura)) {
-                JOptionPane.showMessageDialog(this, "Factura guardada exitosamente en memoria.");
-                this.dispose();
+            // ======================================
+            // CLIENTE
+            // ======================================
+
+            Cliente cliente =
+                    new Cliente(
+                            idCliente,
+                            "Cliente",
+                            "CF",
+                            "00000000",
+                            "Ciudad"
+                    );
+
+            // ======================================
+            // FACTURA
+            // ======================================
+
+            Factura factura =
+                    new Factura(
+                            idFactura,
+                            fecha,
+                            cliente
+                    );
+
+            // ======================================
+            // DETALLES
+            // ======================================
+
+            for (int i = 0;
+                    i < modeloTabla.getRowCount();
+                    i++) {
+
+                int idProducto =
+                        ((Number)
+                                modeloTabla
+                                        .getValueAt(i, 0))
+                                .intValue();
+
+                double precio =
+                        ((Number)
+                                modeloTabla
+                                        .getValueAt(i, 1))
+                                .doubleValue();
+
+                int cantidad =
+                        ((Number)
+                                modeloTabla
+                                        .getValueAt(i, 2))
+                                .intValue();
+
+                Producto producto =
+                        new Producto(
+                                idProducto,
+                                "Producto",
+                                precio,
+                                100
+                        );
+
+                DetalleFactura detalle =
+                        new DetalleFactura(
+                                producto,
+                                cantidad,
+                                precio
+                        );
+
+                factura.agregarDetalle(
+                        detalle
+                );
             }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al procesar la factura: " + ex.getMessage());
+
+            // ======================================
+            // GUARDAR MYSQL
+            // ======================================
+
+            if (facturaDAO.guardar(factura)) {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "¡Factura guardada correctamente!"
+                );
+
+                limpiar();
+            }
+
+        } catch (NumberFormatException e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "ID de factura, ID de cliente, "
+                    + "ID de producto, precio y cantidad "
+                    + "deben ser números válidos."
+            );
+
+        } catch (Exception e) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error:\n"
+                    + e.getMessage()
+            );
         }
     }
 
-    private void limpiarCamposProducto() {
-        txtProducto.setText("");
-        txtPrecio.setText("");
-        txtCantidad.setText("");
-        txtProducto.requestFocus();
+    // ==========================================
+    // LIMPIAR
+    // ==========================================
+
+    private void limpiar() {
+
+        txtNumero.setText("");
+        txtCliente.setText("");
+
+        txtFecha.setText(
+                LocalDate.now().toString()
+        );
+
+        modeloTabla.setRowCount(0);
+
+        lblTotal.setText(
+                "TOTAL: Q0.00"
+        );
     }
 }
